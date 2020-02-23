@@ -1,0 +1,111 @@
+body, html {
+  height: auto;
+  font-family: "raleway", sans-serif;
+}
+
+html {
+  background: url(/static/img/landing.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  /* font-size: 16px */
+}
+
+.img-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: left;
+}
+
+.img-overlay:before {
+  content: ' ';
+  display: block;
+  /* adjust 'height' to position overlay content vertically */
+  height: 50%;
+}
+
+.btn-responsive {
+  /* matches 'btn-md' */
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.3333333;
+  border-radius: 6px;
+}
+
+.container {
+  position: absolute;
+  text-align: left;
+  /* color: black; */
+  color: #FFE5AA;
+  top: 25%;
+  left: 10%;
+  padding-bottom: 50px;
+}  
+ 
+/.btn {
+  margin-left: 10px;
+  margin-right: 10px;
+
+}
+
+.btn-info {
+  /* font-family: Raleway-SemiBold; */
+  font-size: 13px;
+  /* color: rgba(23, 162, 184, 0.75); */
+  color: orange;
+  letter-spacing: 1px;
+  line-height: 15px;
+  /* border: 2px solid rgba(103, 192, 103, 0.75);*/
+  border: 2px solid orange;
+  border-radius: 40px;
+  background: transparent;
+  transition: all 0.3s ease 0s;
+}
+
+.btn-info:hover {
+  color: orange;
+  background: #256664;
+  border: 2px solid #256664;
+}
+
+.min-height {
+  /* min-height: 50%; */
+  padding-top: 20px;
+  padding-bottom: 10px;
+}
+
+/* Phone */
+@media screen and (min-width: 480px) /* Mobile */ {
+  body, .lead {
+    font-size: .8em;
+    color: #FFE5AA;
+  }
+}
+
+/* Tablet */
+@media screen and (min-width: 768px) /* Mobile */ {
+  body, .lead {
+    font-size: 1.0em;
+    color: #FFE5AA;
+  }
+}
+
+/* Desktop */
+@media screen and (min-width: 992px) /* Tablet */ {
+  body, .lead {
+    font-size: 1.10em;
+    color: #FFE5AA;
+  }
+}
+
+/* Huge */
+@media screen and (min-width: 1280px) {
+  body, .lead {
+  font-size: 1.25em;
+  color: #FFE5AA;
+  }
+}
