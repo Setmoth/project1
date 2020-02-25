@@ -12,6 +12,18 @@ html {
   /* font-size: 16px */
 }
 
+a {
+  color: orange;
+}
+
+a:hover {
+  color: orange;
+}
+
+.nounderline {
+  text-decoration: none !important
+}
+
 .img-overlay {
   position: absolute;
   top: 0;
@@ -77,6 +89,7 @@ html {
   padding-top: 20px;
   padding-bottom: 10px;
 }
+
 
 /* Phone */
 @media screen and (min-width: 480px) /* Mobile */ {
