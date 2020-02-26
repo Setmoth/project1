@@ -2,3 +2,5 @@
 __pycache__/application.cpython-37.pyc
 flask_session/2029240f6d1128be89ddc32729463129
 flask_session/dd8de60fb428bfeaacbc07b6a77d5f90
+.DS_Store
+*.pyc
