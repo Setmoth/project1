@@ -1,6 +1,7 @@
 import os
 import sys
 import io
+import sqlalchemy
 
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
@@ -47,56 +48,24 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
 	print(">>>>> Log user in <<<<<")
-	print("method", request.method)
 	# Forget any user
 	session.clear()
 
 	# User reached route via POST (as by submitting a form via POST)
 	if request.method == "POST":
 
-		# Ensure username was submitted
-		if not request.form.get("username"):
-		    flash("Please, provide your username", 'warning')
-		    return render_template("login.html")
-
-		# Ensure password was submitted
-		elif not request.form.get("password"):
-		    flash("Please, provide your password", 'warning')
-		    return render_template("login.html")
-
-		# Query database for username
-		print(">>>>> Query DB <<<<<") 
-
-		# Get form information.
-		username = request.form.get("username")
-		try:
-		    if username == db.execute("SELECT username FROM users WHERE username = :username", 
-		    							{"username": username}).fetchone():
-		    	print("username ", username)
-		    else:
-		    	flash("Your username or password is wrong", 'warning') # For security name both so risk of guessing is lower
-		    	return render_template("login.html")
-		except ValueError:
-		    flash("Your username or password is wrong", 'warning') # For security name both so risk of guessing is lower
-		    return render_template("login.html")
-
-		# Ensure username exists and password is correct
-		#for row in rows:
-		if not check_password_hash(row[2], request.form.get("password")):
+		if validateAuth() == False:
 			flash("Your username or password is wrong", 'warning') # For security name both so rik of guessing is lower
 			return render_template("login.html")
-		
-		# Remember which user has logged in
-	    #session["user_id"] = row[0]
+		else:
+			print(">>>>> Redirect user to the search page <<<<<")
+			# Redirect user to home page
+			flashMessage = "Welcome in your House of Books again, " + request.form.get("username")
+			flash(flashMessage, 'info')
 
-		print(">>>>> Redirect user to home page <<<<<")
-		# Redirect user to home page
-		flashMessage = "Welcome in the House of Books again, " + request.form.get("username")
-		flash(flashMessage, 'info')
+			return redirect("/search")
 
-		return redirect("/search")
-
-	    # User reached route via GET (as by clicking a link or via redirect)
+		    # User reached route via GET (as by clicking a link or via redirect)
 	else:
 		return render_template("login.html")
 
@@ -107,8 +76,9 @@ def register():
 
 	if request.method == "POST":
 		
-		if (validateUsername() and  validatePassword()) == True:
-			print("# Do nothing")
+		if (validateRegisterUsername() and validateRegisterPassword()) == True:
+			if storeUser() == False:
+				return render_template("errorPage.html")
 		else:
 			return redirect("/register")
 
@@ -117,9 +87,16 @@ def register():
 		return render_template("register.html")
 
 
+@app.route("/search")
+@login_required
+def search():
+	print(">>>>> SEARCH <<<<<")
+	return render_template("search.html")
+
+
 @app.route("/logout")
 def logout():
-	"""Log user out"""
+	print(">>>>> Log user out <<<<<")
 
 	# Forget any user_id
 	session.clear()
@@ -128,42 +105,141 @@ def logout():
 	return redirect("/")
 
 
-def validateUsername():
+@app.route("/errorPage")
+@login_required
+def errorPage():
+	# Forget any user_id
+	print("errorPage")
+	session.clear
+	return render_template("errorPage.html")	
+
+
+@app.errorhandler(HTTPException)
+def errorhandler(e):
+	print(">>>>> internal_server_error <<<<<")
+	return render_template('errorPage.html')
+	#return render_template('errorPage.html', error=e), error.code
+
+
+# Listen for errors
+for code in default_exceptions:
+    app.errorhandler(code)(errorhandler)
+
+
+def validateRegisterUsername():
 	# Check username
-	if not request.form.get("username"):
-		flash('Please provide a username', 'info')
+	if validateEmptyUsername() == False:
 		return False
 	else:
 		# Check if username exists in database
 		username = request.form.get("username")
-		
+
 		try:
-			if username == db.execute("SELECT username FROM users WHERE username = :username", 
-										{"username": username}).fetchone():
+			if db.execute("SELECT username FROM users WHERE username = :username", 
+										{"username": username}).fetchone() == None:
+				print("Do Nothing")
+			else:	
 				flash('The username already exists', 'info')
 				return False
-		except:
+		except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
 			flash('An error occured, please retry', 'error')
 			return False
-	
 	return True
 
 
-def validatePassword():
-	print("Check if a password has been provided")
-	if not request.form.get("password"):
-		flash('Please, provide a password', 'info')
-		return False 
+def validateRegisterPassword():
+	if validateEmptyPassword() == False:
+		return False
 
 	# Check if password not less than 6 characters
 	if len(request.form.get("password")) < 6:
 	    flash('Password should be a least 6 characters', 'info')
 	    return False 
 
-	print("Check is both password match (password & confirmation)")
+	# Check if both password match (password & confirmation)
 	if request.form.get("password") != request.form.get("confirmation"):
 	    flash('Password don\'t match', 'info')
 	    return False 
 
-	return True   
+	return True
+
+
+def validateAuth():
+	if (validateLoginUsername() or validateLoginPassword()) == False:
+		return False
+	else:
+		print(">>>>> Query DB <<<<<") 
+
+		# Get form information.
+		username = request.form.get("username")
+
+		try:
+			foundUser = db.execute("SELECT * FROM users WHERE username = :username", 
+		    							{"username": username}).fetchone()
+
+			if foundUser == None:
+				return False
+
+			if not username == foundUser[1].rstrip():
+				return False
+
+		except ValueError:
+			return False
+
+		# Ensure username exists and password is correct
+		if not check_password_hash(foundUser[2].rstrip(), request.form.get("password")):
+			return False
+		else:
+			# Remember which user has logged in
+			session["user_id"] = foundUser[0]
+			return True
+
+
+def validateLoginUsername():
+	if validateEmptyUsername() == False:
+		return False
+	else:
+		return True
+
+
+def validateLoginPassword():
+	if validateEmptyPassword() == False:
+		return False
+	else:
+		return True
+
+
+def validateEmptyUsername():
+	if not request.form.get("username"):
+		flash('Please provide a username', 'info')
+		return False
+	else:
+		return True
+
+
+def validateEmptyPassword():
+	if not request.form.get("password"):
+		flash('Please, provide a password', 'info')
+		return False
+	else:
+		return True 		
+
+
+def storeUser():
+	# Store username & password in database
+	# Hash password
+	password = request.form.get("password")
+	hashedPassword = generate_password_hash(password)
+	username = request.form.get("username") 
+
+	try:
+		db.execute("INSERT INTO users(username, password) VALUES (:username, :password)",
+				{"username": username, "password": hashedPassword})
+		db.commit()
+	except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
+		flash('An error occured, please retry', 'error')
+		return False 
+
+	return True
+	
 
