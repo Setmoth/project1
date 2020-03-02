@@ -212,7 +212,31 @@ def errorPage():
 	# Forget any user_id
 	print("errorPage")
 	session.clear
-	return render_template("errorPage.html")	
+	return render_template("errorPage.html")
+
+
+@app.route("/api/<isbn>")
+def isbn_api(isbn):
+	print(">>>>> API <<<<<")
+	try:
+		if db.execute("SELECT * FROM books WHERE isbn = :isbn", 
+							{"isbn": isbn}).fetchone() == None:
+			return jsonify({"error": "Invalid isbn"}), 404
+		else:
+			print("do something")
+	except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
+		print(">>>>>>>>>>>>>> ERR(R)RROR START <<<<<<<<<<<<<<<<")
+		print(e)
+		print(">>>>>>>>>>>>>> ERR(R)RROR END <<<<<<<<<<<<<<<<")
+		return jsonify({"error": "Invalid isbn"}), 500
+	return jsonify ({
+			"title": "Memory",
+    		"author": "Doug Lloyd",
+    		"year": 2015,
+    		"isbn": "1632168146",
+    		"review_count": 28,
+    		"average_score": 5.0
+		})
 
 
 @app.errorhandler(HTTPException)
