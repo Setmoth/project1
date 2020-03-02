@@ -1,4 +1,0 @@
- #!usr/bin/env bash
-export FLASK_APP=application.py
-export FLASK_DEBUG=1
-export DATABASE_URL=postgres://rxosewbmtiyboz:aecfa045a196f3d268f10c40798846d0897df922d878e4ba1bd4b375489d5726@ec2-176-34-97-213.eu-west-1.compute.amazonaws.com:5432/d7rcieo07lme90

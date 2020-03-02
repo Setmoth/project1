@@ -2,8 +2,10 @@ import os
 import sys
 import io
 import sqlalchemy
+import requests
+import json
 
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, request, session, jsonify
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -36,6 +38,9 @@ Session(app)
 # Set up database
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
+
+# APIKEY GOODREADS
+goodreadsKey = os.environ.get("GOODREADS_KEY")
 
 
 @app.route("/")
@@ -87,16 +92,104 @@ def register():
 		return render_template("register.html")
 
 
-@app.route("/search")
+@app.route("/search", methods=["GET", "POST"])
 @login_required
 def search():
 	print(">>>>> SEARCH <<<<<")
-	return render_template("search.html")
+	
+	if request.method == "POST":
+		if validateEmptySearch() == False:
+			return render_template("search.html")
+		books = searchISBN()
+		if books == []:
+			flash('Could not find any titles', 'info')
+
+		#print(searchISBN())
+		#print(len(searchISBN()))
+		#if len(searchISBN()) == 3:
+			#print("hiero")
+			#flash('Could not find any titles', 'info')
+		return render_template("search.html", books=books)
+	else:
+		return render_template("search.html")
+
+
+@app.route("/title/<int:id>", methods=["GET", "POST"])
+@login_required
+def title(id):
+	print(">>>>> TITLEID <<<<<")
+	# Lists details about a single book.
+	print(request.method)
+	bookID = id  #see below---- is hidden ID needed or only for routing?
+	# Make sure book exists.
+	title = db.execute("SELECT * FROM books WHERE id = :id", {"id": id}).fetchone()
+	if title is None:
+		flash('Their is no such book', 'warning')
+		return render_template("errorPage.html")
+
+	res = requests.get("https://www.goodreads.com/book/review_counts.json",
+					params={"key":os.environ.get("GOODREADS_KEY"),"isbns":title[4]})
+	#proces error 404
+	result = res.json()
+	print(result)
+	x = result["books"][0]
+	y = [(x["text_reviews_count"],x["average_rating"])]
+	print(y)
+
+	if request.method == "POST":
+		print(request.method)
+		print(request.form['review']) 
+		print(request.form['title_id'])
+		print("hello end of the world")
+		userID = session["user_id"]
+		bookID = int(request.form.get("title_id"), 0) #make the ID een integer
+		review = request.form.get("review")
+		print(userID, bookID, review)
+
+		try:
+			db.execute("INSERT INTO reviews(id_book, id_user, review) VALUES (:id_book, :id_user, :review)",
+						{"id_book": bookID, "id_user": userID, "review": review})
+			db.commit()
+		except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
+			print(">>>>>>>>>>>>>> ERRROR START <<<<<<<<<<<<<<<<")
+			print(e)
+			print(">>>>>>>>>>>>>> ERRROR END <<<<<<<<<<<<<<<<")
+			flash('An error occured, please retry', 'error')
+			return render_template("errorPage.html")
+
+	return render_template("title.html", title=title, res=y)
+
+
+@app.route("/review", methods=["POST"])
+@login_required
+def review():
+	print(">>>>> REVIEW <<<<<")
+	if request.method == "POST":
+		print(request.method)
+		print(request.form['review']) 
+		print(request.form['title_id'])
+		print("hello end of the world")
+		userID = session["user_id"]
+		bookID = int(request.form.get("title_id"), 0) #make the ID een integer
+		review = request.form.get("review")
+		print(userID, bookID, review)
+
+		try:
+			db.execute("INSERT INTO reviews(id_book, id_user, review) VALUES (:id_book, :id_user, :review)",
+						{"id_book": bookID, "id_user": userID, "review": review})
+			db.commit()
+		except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
+			print(">>>>>>>>>>>>>> ERRROR START <<<<<<<<<<<<<<<<")
+			print(e)
+			print(">>>>>>>>>>>>>> ERRROR END <<<<<<<<<<<<<<<<")
+			flash('An error occured, please retry', 'error')
+			return render_template("errorPage.html")
+	return render_template("title.html")
 
 
 @app.route("/logout")
 def logout():
-	print(">>>>> Log user out <<<<<")
+	print(">>>>> Logout User <<<<<")
 
 	# Forget any user_id
 	session.clear()
@@ -133,6 +226,10 @@ def validateRegisterUsername():
 	else:
 		# Check if username exists in database
 		username = request.form.get("username")
+
+		if len(username) > 16:
+			flash('The username should contain a maximum of 16 characters', 'warning')
+			return False
 
 		try:
 			if db.execute("SELECT username FROM users WHERE username = :username", 
@@ -211,7 +308,7 @@ def validateLoginPassword():
 
 def validateEmptyUsername():
 	if not request.form.get("username"):
-		flash('Please provide a username', 'info')
+		flash('Please provide a username', 'warning')
 		return False
 	else:
 		return True
@@ -219,7 +316,15 @@ def validateEmptyUsername():
 
 def validateEmptyPassword():
 	if not request.form.get("password"):
-		flash('Please, provide a password', 'info')
+		flash('Please, provide a password', 'warning')
+		return False
+	else:
+		return True 		
+
+
+def validateEmptySearch():
+	if not request.form.get("key"):
+		flash('Please, provide a search keyword', 'warning')
 		return False
 	else:
 		return True 		
@@ -237,9 +342,25 @@ def storeUser():
 				{"username": username, "password": hashedPassword})
 		db.commit()
 	except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
+		print(e)
 		flash('An error occured, please retry', 'error')
 		return False 
 
 	return True
 	
 
+def searchISBN():
+	#Find results based on isbn
+	key = request.form.get("key")
+
+	# CustomerName LIKE '%or%'
+
+	try:
+		books = db.execute("SELECT * FROM books WHERE (isbn ILIKE '%' || :key || '%') \
+									OR (title ILIKE '%'  || :key || '%') \
+									OR author ILIKE '%'  || :key || '%'", 
+	    							{"key": key}).fetchall()
+
+	except ValueError:
+		return False
+	return books

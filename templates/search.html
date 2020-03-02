@@ -5,6 +5,35 @@
 {% endblock %}
 
 {% block main %}
-    <h1> succses</h1>
+    <form action="/search" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="key" placeholder="isbn or title or author" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+    <form action="/search" method="post" name="books">   
+        <table id="roster" class="container p-5" class="table table-striped table-hover" style="width:100%">
+          <thead>
+            <tr class="text-left">
+              <th>ISBN</th> 
+              <th>TITLE</th> 
+              <th>AUTHOR</th>
+              <th>YEAR</th>
+            </tr>
+          </thead>
+          <tbody>
+				{% for book in books -%} <!-- Trim white space -->
+				 <tr class="text-left">
+				    <td><a href="{{ url_for('title', id=book[1]) }}">{{ book[4] }}</a></td> <!-- ISBN -->
+					    <td>{{ book[2] }}</td> <!-- TITLE -->
+					    <td>{{ book[0] }}</td> <!-- AUTHOR -->
+					    <td>{{ book[3] }}</td> <!-- YEAR -->
+				 </tr>
+				{% endfor %}   
+            </tbody>
+        </table>
 
+        <!-- <button class="btn btn-primary" type="submit">Mark as Processed</button> -->
+    </form>
+    
 {% endblock %}

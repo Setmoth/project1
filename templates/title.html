@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Title
+{% endblock %}
+
+{% block main %}
+    <h1>Title Details</h1>
+
+    <ul>
+        <li>{{ title }}</li>
+        <li>{{ title[1] }} ID</li>
+        <li> {{ title[2] }}</li>
+        <li>hiero</li>
+
+	</ul>
+    <div class="container">
+			<div class="row">
+			<div class="col-6" >
+  				<p class="lead">a {{ title }} {{ title[1]}} b
+				</p>	
+			</div>
+			<div class="col-6">
+				<div>
+					<p>{{ res[0] }}</p>
+					<p>{{ res[1] }}</p>
+      			</div>	
+		</div>
+	</div>
+
+	<form action="/review" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus style="width: 300px" class="form-control" name="review" placeholder="add a review for this title" type="text">
+            <input type="hidden" name="title_id" value="{{ title[1] }}">
+        </div>
+        <!-- <button class="btn btn-primary"  type="submit">Post Review</button> -->
+        <button type="submit" formaction="{{ url_for('title', id=title[1]) }}">Click me</button>
+    </form>	
+
+
+{% endblock %}

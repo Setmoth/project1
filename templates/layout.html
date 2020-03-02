@@ -12,7 +12,7 @@
         <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
 
         <!-- https://favicon.io/emoji-favicons/money-mouth-face/ -->
-        <link href="/static/img/favicon.ico" rel="icon">
+        <link href="/static/favicon.ico" rel="icon">
 
         <link href="/static/styles.css" rel="stylesheet">
 
@@ -20,7 +20,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
 
-        <title>The House of Books - {% block title %}{% endblock %}</title>
+        <title>Your House of Books - {% block title %}{% endblock %}</title>
 
     </head>
 
@@ -63,40 +63,7 @@
 
         <main class="container p-5">
             {% block main %}
-            <form action="/" method="post" name="checkbox">   
-                <table id="roster" class="table table-striped table-hover" style="width:100%">
-                  <thead>
-                    <tr class="text-left">
-                      <th>Processed</th>  
-                      <th>Date</th>
-                      <th>CR/DB</th>
-                      <th>Valuta</th>
-                      <th>Amount</th>
-                      <th>Description</th>
-                      <th>Contra account number</th>
-                      <th>Contra account</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                      {% for rows in rows %}
-                         <tr class="text-left">
-                            <td><input type="checkbox" id="{{ checkbox }}" name="checkbox" value="{{ rows[16] }}"></td>
-                            <!-- <label for="{{ checkbox }}">{{ "Y" }}</label> -->
-                            <!-- <td>{{ rows[0] }}</td> --> <!-- Processed -->
-                            <td>{{ rows[3] }}</td> <!-- Date -->
-                            <td>{{ rows[5] }}</td> <!-- CR/DB -->
-                            <td>{{ rows[4] }}</td> <!-- Valuta -->
-                            <td>{{ '%0.2f'| format(rows[6]|float) }}</td>
-                            <td>{{ rows[11] }}</td> <!-- Description -->
-                            <td>{{ rows[7] }}</td> <!-- contra account number -->
-                            <td>{{ rows[8] }}</td> <!-- contra account Name-->
-                         </tr>
-                      {% endfor %}
-                      <br>
-                  </tbody>
-                </table>
-                <button class="btn btn-primary" type="submit">Mark as Processed</button>
-            </form>
+            
             {% endblock %}
         </main>
     </body>
