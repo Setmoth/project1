@@ -37,5 +37,12 @@
         <button type="submit" formaction="{{ url_for('title', id=title[1]) }}">Click me</button>
     </form>	
 
+    <!-- show review -->
+    <div>
+    	<p> reviews</p>
+	    {% for review in reviews %}
+	    	<p> review {{ review }} </p>
+		{% endfor %}
+	</div>
 
 {% endblock %}

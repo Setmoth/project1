@@ -136,14 +136,22 @@ def title(id):
 	y = [(x["text_reviews_count"],x["average_rating"])]
 	print(y)
 
+	reviews = loadReviews(id)
+
 	if request.method == "POST":
 		print(request.method)
 		print(request.form['review']) 
 		print(request.form['title_id'])
 		print("hello end of the world")
+
 		userID = session["user_id"]
 		bookID = int(request.form.get("title_id"), 0) #make the ID een integer
 		review = request.form.get("review")
+
+		if checkReviewUser(userID, bookID) == False:
+			flash('You already post a review', 'warning')
+			return render_template("title.html", title=title, res=y, reviews=reviews)
+
 		print(userID, bookID, review)
 
 		try:
@@ -157,7 +165,7 @@ def title(id):
 			flash('An error occured, please retry', 'error')
 			return render_template("errorPage.html")
 
-	return render_template("title.html", title=title, res=y)
+	return render_template("title.html", title=title, res=y, reviews=reviews)
 
 
 @app.route("/review", methods=["POST"])
@@ -179,9 +187,9 @@ def review():
 						{"id_book": bookID, "id_user": userID, "review": review})
 			db.commit()
 		except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
-			print(">>>>>>>>>>>>>> ERRROR START <<<<<<<<<<<<<<<<")
+			print(">>>>>>>>>>>>>> ERR(R)RROR START <<<<<<<<<<<<<<<<")
 			print(e)
-			print(">>>>>>>>>>>>>> ERRROR END <<<<<<<<<<<<<<<<")
+			print(">>>>>>>>>>>>>> ERR(R)RROR END <<<<<<<<<<<<<<<<")
 			flash('An error occured, please retry', 'error')
 			return render_template("errorPage.html")
 	return render_template("title.html")
@@ -350,6 +358,7 @@ def storeUser():
 	
 
 def searchISBN():
+	print(">>>>> searchISBN <<<<<")
 	#Find results based on isbn
 	key = request.form.get("key")
 
@@ -364,3 +373,34 @@ def searchISBN():
 	except ValueError:
 		return False
 	return books
+
+
+def loadReviews(id):
+	print(">>>>> loadReviews <<<<<")
+	#load all reviews for title
+
+	try:
+		reviews = db.execute("SELECT * FROM reviews WHERE id_book = :id_book",
+									{"id_book": id})
+	except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
+		print(e)
+		flash('An error occured, please retry', 'error')
+		return render_template("errorPage.html")
+	return reviews
+
+
+def checkReviewUser(userID, bookID):
+	print(">>>>> checkReviewUser")
+
+	try:
+		if db.execute("SELECT * FROM reviews WHERE id_user = :id_user AND id_book = :id_book",
+							{"id_user": userID, "id_book": bookID}).fetchone() == None:
+			return True
+		else:
+			return False
+	except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
+		print(e)
+		flash('An error occured, please retry, already posted a review', 'error')
+		return False
+	return True
+

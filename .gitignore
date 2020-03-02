@@ -4,3 +4,6 @@ flask_session/2029240f6d1128be89ddc32729463129
 flask_session/dd8de60fb428bfeaacbc07b6a77d5f90
 .DS_Store
 *.pyc
+*.pyc
+flask_session/2029240f6d1128be89ddc32729463129
+flask_session/a1dd892be87fc47a29c425d7d0d333c4
