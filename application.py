@@ -87,7 +87,7 @@ def register():
 		else:
 			return redirect("/register")
 
-		return render_template("landingPage.html")
+		return render_template("search.html")
 	else:
 		return render_template("register.html")
 
@@ -144,8 +144,11 @@ def title(id):
 		review = request.form.get("review")
 		rating = request.form.get("rating")
 
+		if validateRating() == False:
+			return render_template("title.html", title=title, res=y, reviews=reviews)
+
 		if checkReviewUser(userID, bookID) == False:
-			flash('You already post a review', 'warning')
+			flash('You already posted a review', 'warning')
 			return render_template("title.html", title=title, res=y, reviews=reviews)
 
 		print(userID, bookID, review, rating)
@@ -154,6 +157,7 @@ def title(id):
 			db.execute("INSERT INTO reviews(id_book, id_user, review, rating) VALUES (:id_book, :id_user, :review, :rating)",
 						{"id_book": bookID, "id_user": userID, "review": review, "rating": rating})
 			db.commit()
+			reviews = loadReviews(id) # Need to see my new review too ;)
 		except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
 			print(">>>>>>>>>>>>>> ERRROR START <<<<<<<<<<<<<<<<")
 			print(e)
@@ -168,27 +172,8 @@ def title(id):
 @login_required
 def review():
 	print(">>>>> REVIEW <<<<<")
-	if request.method == "POST":
-		print(request.method)
-		print(request.form['review']) 
-		print(request.form['title_id'])
-		print("hello end of the world")
-		userID = session["user_id"]
-		bookID = int(request.form.get("title_id"), 0) #make the ID een integer
-		review = request.form.get("review")
-		print(userID, bookID, review)
-
-		try:
-			db.execute("INSERT INTO reviews(id_book, id_user, review) VALUES (:id_book, :id_user, :review)",
-						{"id_book": bookID, "id_user": userID, "review": review})
-			db.commit()
-		except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
-			print(">>>>>>>>>>>>>> ERR(R)RROR START <<<<<<<<<<<<<<<<")
-			print(e)
-			print(">>>>>>>>>>>>>> ERR(R)RROR END <<<<<<<<<<<<<<<<")
-			flash('An error occured, please retry', 'error')
-			return render_template("errorPage.html")
-	return render_template("title.html")
+	print("######################     OBSOLETE     ##########################################")
+	return render_template("errorPage.html", message="OBSOLETE")
 
 
 @app.route("/logout")
@@ -365,7 +350,15 @@ def validateEmptySearch():
 		flash('Please, provide a search keyword', 'warning')
 		return False
 	else:
-		return True 		
+		return True
+
+
+def validateRating():
+	if int(request.form.get("rating")) > 0 and int(request.form.get("rating")) < 6:
+		return True
+	else:
+		flash('Rating shoulde be numeric (1-5)', 'warning')
+		return False
 
 
 def storeUser():
