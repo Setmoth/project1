@@ -127,14 +127,9 @@ def title(id):
 		flash('Their is no such book', 'warning')
 		return render_template("errorPage.html")
 
-	res = requests.get("https://www.goodreads.com/book/review_counts.json",
-					params={"key":os.environ.get("GOODREADS_KEY"),"isbns":title[4]})
-	#proces error 404
-	result = res.json()
-	print(result)
-	x = result["books"][0]
-	y = [(x["text_reviews_count"],x["average_rating"])]
-	print(y)
+	y = getGoodreadsRating(title[4])
+	print("y2", y)
+	
 
 	reviews = loadReviews(id)
 
@@ -147,23 +142,24 @@ def title(id):
 		userID = session["user_id"]
 		bookID = int(request.form.get("title_id"), 0) #make the ID een integer
 		review = request.form.get("review")
+		rating = request.form.get("rating")
 
 		if checkReviewUser(userID, bookID) == False:
 			flash('You already post a review', 'warning')
 			return render_template("title.html", title=title, res=y, reviews=reviews)
 
-		print(userID, bookID, review)
+		print(userID, bookID, review, rating)
 
 		try:
-			db.execute("INSERT INTO reviews(id_book, id_user, review) VALUES (:id_book, :id_user, :review)",
-						{"id_book": bookID, "id_user": userID, "review": review})
+			db.execute("INSERT INTO reviews(id_book, id_user, review, rating) VALUES (:id_book, :id_user, :review, :rating)",
+						{"id_book": bookID, "id_user": userID, "review": review, "rating": rating})
 			db.commit()
 		except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
 			print(">>>>>>>>>>>>>> ERRROR START <<<<<<<<<<<<<<<<")
 			print(e)
 			print(">>>>>>>>>>>>>> ERRROR END <<<<<<<<<<<<<<<<")
 			flash('An error occured, please retry', 'error')
-			return render_template("errorPage.html")
+			return render_template("errorPage.html", message=e)
 
 	return render_template("title.html", title=title, res=y, reviews=reviews)
 
@@ -218,24 +214,31 @@ def errorPage():
 @app.route("/api/<isbn>")
 def isbn_api(isbn):
 	print(">>>>> API <<<<<")
+	print("isbn", isbn)
 	try:
-		if db.execute("SELECT * FROM books WHERE isbn = :isbn", 
-							{"isbn": isbn}).fetchone() == None:
+		title = db.execute("SELECT * FROM books WHERE isbn = :isbn",
+							{"isbn": isbn}).fetchone()
+
+		print("title.api", title)
+
+		if title == None:
 			return jsonify({"error": "Invalid isbn"}), 404
 		else:
 			print("do something")
+			y = getGoodreadsRating(isbn)
+
 	except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
 		print(">>>>>>>>>>>>>> ERR(R)RROR START <<<<<<<<<<<<<<<<")
 		print(e)
 		print(">>>>>>>>>>>>>> ERR(R)RROR END <<<<<<<<<<<<<<<<")
 		return jsonify({"error": "Invalid isbn"}), 500
 	return jsonify ({
-			"title": "Memory",
-    		"author": "Doug Lloyd",
-    		"year": 2015,
-    		"isbn": "1632168146",
-    		"review_count": 28,
-    		"average_score": 5.0
+			"title": title[2].rstrip(),
+    		"author": title[0].rstrip(),
+    		"year": title[3],
+    		"isbn": isbn,
+    		"review_count": y[0],
+    		"average_score": y[1]
 		})
 
 
@@ -312,8 +315,11 @@ def validateAuth():
 			if not username == foundUser[1].rstrip():
 				return False
 
-		except ValueError:
-			return False
+		except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
+			print(e)
+			flash('An error occured, please retry', 'error')
+			return render_template("errorPage.html")
+
 
 		# Ensure username exists and password is correct
 		if not check_password_hash(foundUser[2].rstrip(), request.form.get("password")):
@@ -427,4 +433,18 @@ def checkReviewUser(userID, bookID):
 		flash('An error occured, please retry, already posted a review', 'error')
 		return False
 	return True
+
+
+def getGoodreadsRating(title):
+	res = requests.get("https://www.goodreads.com/book/review_counts.json",
+					params={"key":os.environ.get("GOODREADS_KEY"),"isbns":title})
+	#proces error 404
+	result = res.json()
+	print(result)
+	x = result["books"][0]
+	y = [x["text_reviews_count"],x["average_rating"]]
+	print("y1", y)
+
+	return y
+
 

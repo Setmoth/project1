@@ -28,9 +28,10 @@
 		</div>
 	</div>
 
-	<form action="/review" method="post">
+	<form action="/review" method="post"> <!-- is action needed while routing is via url -->
         <div class="form-group">
-            <input autocomplete="off" autofocus style="width: 300px" class="form-control" name="review" placeholder="add a review for this title" type="text">
+            <input autocomplete="off" autofocus class="form-control" name="rating" placeholder="add a rating 1-5" type="number" min="1" max="5" value="1"> 
+            <input autocomplete="off" style="width: 300px" class="form-control" name="review" placeholder="add a review for this title" type="text">
             <input type="hidden" name="title_id" value="{{ title[1] }}">
         </div>
         <!-- <button class="btn btn-primary"  type="submit">Post Review</button> -->
