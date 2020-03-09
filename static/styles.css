@@ -4,22 +4,109 @@ nav .navbar-brand
     font-size: xx-large;
 }
 
-/* colors for brand */
-nav .navbar-brand .blue
-{
-    color: #537fbe;
+.border-top {
+  border: 10px;
+  border-color: grey;
 }
-nav .navbar-brand .red
-{
-    color: #ea433b;
+
+.border-left {
+  border: 10px;
+  border-color: grey;
 }
-nav .navbar-brand .yellow
-{
-    color: #f5b82e;
+
+.grid {
+  display: grid;
+  grid-template: 150px; /* / auto auto auto; */
+  grid-gap : 10px;
+  background-color: #fff3cd;
+  border: 10px solid #256664;
+  padding: 10px;
+  margin: 125px;
+  margin-top: 50px;
+  border-radius: 25px;
+  justify-content: space-around;
 }
-nav .navbar-brand .green
-{
-    color: #2e944b;
+
+.red {
+  /* Container Border outside*/
+  background-color: #fff3cd;
+  border: 10px solid #256664;
+  /* border-left: 25px solid #256664; */
+  /* grid-area: 1 / 2 / 2; */
+  grid-area: 1 / 1;
+  margin-top: 0px;
+  margin-left: -15px;
+  margin-bottom: 15px;
+  border-radius: 25px;
+}
+
+.login {
+  border-top: 10px;
+  border-left-width: 20px
+  border-color: green;
+  /* grid-area: 1 / 2 / 1 / 3; */
+  grid-area: 1 / 1;
+}
+
+.search {
+  border-top: 10px;
+  border-left-width: 20px
+  border-color: green;
+  /* grid-area: 1 / 2 / 1 / 3; */
+  grid-area: 1 / 1;
+}
+
+ .books {
+  border-top: 10px;
+  border-left-width: 20px
+  border-color: green;
+  grid-area: 2 / 1;
+  /* grid-area: 3 / 2 / 3 / 3; */
+ }
+
+ .title {
+  /* grid-area: 2 / 2 / 2 / 2; */
+  grid-area: 2 / 1;
+ }
+
+ .rating {
+  /* grid-area: 3 / 2 / 3 / 2; */
+  grid-area: 3 / 1;
+ }
+
+ .review {
+  /* grid-area: 3 / 2 / 3 / 2; */
+  grid-area: 3 / 1 /;
+ }
+
+ .card {
+  background-color: #fff3cd;
+  border: none;
+ }
+
+.list-group-item {
+  background-color: orange;
+}
+
+.btn {
+  color: orange;
+  background-color: #256664;
+}
+
+
+.btn:hover {
+  color: #fff3cd;
+  background-color: #256664;
+}
+
+
+.list-group-item {
+  background-color: orange;
+}
+
+.resizedTextbox {
+  width: 100px; 
+  height:200px;
 }
 
 main .form-control
@@ -52,5 +139,54 @@ main img
 }
 
 h1 {
-    color: #ea433b;
+    grid-area: 1 / 1;
+    color: #256664;
+}
+
+h2 {
+  color: #256664;
 }    
+
+th {
+    color: #256664;
+}
+
+td {
+    color: orange;
+    font-weight: bold;
+}
+
+/* label {display:block;}
+textarea { display:block;} */
+
+#noCSS {
+  color: black;
+  font-weight: normal;
+}
+
+body {
+  background: linear-gradient(90deg, #0096cc, #cbd400);
+  background: url(/static/img/bookshelf2.webp) no-repeat center center fixed; 
+  /* background-color: black; */
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  /* font-size: 16px */
+}
+
+@media only screen and (max-width: 800px) {
+  .grid {
+    margin: 50px;
+
+
+  }
+}
+@media only screen and (max-width: 600px) {
+  .grid {
+    margin: 10px;
+    font-size: 0.75em;
+
+  }
+}
+

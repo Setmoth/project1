@@ -5,45 +5,96 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Title Details</h1>
+    <h1>Your Selected title</h1>
 
-    <ul>
-        <li>{{ title }}</li>
-        <li>{{ title[1] }} ID</li>
-        <li> {{ title[2] }}</li>
-        <li>hiero</li>
-
-	</ul>
-    <div class="container">
-			<div class="row">
-			<div class="col-6" >
-  				<p class="lead">a {{ title }} {{ title[1]}} b
-				</p>	
+    <div class="title">
+		<div class="row">
+			<div class="col-12" >
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Title</th>
+              <th scope="col">Author</th>
+              <th scope="col">Published</th>
+              <th scope="col">ISBN</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ title[2] }}</td>
+              <td>{{ title[0] }}</td>
+              <td>{{ title[3] }}</td>
+              <td>{{ title[4] }}</td>
+            </tr>
+          </tbody>
+        </table>
 			</div>
-			<div class="col-6">
-				<div>
-					<p>{{ res[0] }}</p>
-					<p>{{ res[1] }}</p>
-      			</div>	
 		</div>
 	</div>
 
-	<form action="/review" method="post"> <!-- is action needed while routing is via url -->
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="rating" placeholder="add a rating 1-5" type="number" min="1" max="5" value="1"> 
-            <input autocomplete="off" style="width: 300px" class="form-control" name="review" placeholder="add a review for this title" type="text">
-            <input type="hidden" name="title_id" value="{{ title[1] }}">
-        </div>
-        <!-- <button class="btn btn-primary"  type="submit">Post Review</button> -->
-        <button type="submit" formaction="{{ url_for('title', id=title[1]) }}">Click me</button>
-    </form>	
+  <div class="rating">
+    <div class="row">
+      <div class="col-12" >
+        <table class="table">
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
+              <th scope="col">#Reviews</th>
+              <th scope="col">avg. rating</th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td></td>
+              <td></td>
+              <td>{{ res[0] }}</td>
+              <td>{{ res[1] }}</td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>  
 
+	<div class="review">
+    <form action="/review" method="post"> <!-- is action needed while routing is via url -->
+      <div class="form-group col-12">
+        <table class="table">
+          <tbody>
+              <td></td>
+              <td>
+                <label id="noCSS">Rating(1-5)</label>
+                <input autocomplete="off" class="form-control" name="rating" type="number" min="1" max="5" value="0">
+              </td>
+              <td>
+                <textarea autocomplete="off" class="form-control" name="review" placeholder="add a review for this title" type="text" required></textarea>
+                <input type="hidden" name="title_id" value="{{ title[1] }}">
+              </td>
+          </tbody>
+         </table> 
+      </div>
+      <!-- <button class="btn btn-primary"  type="submit">Post Review</button> -->
+      <button type="submit" class="btn btn-primary" formaction="{{ url_for('title', id=title[1]) }}">Post Review</button>
+    </form>	
+  </div> 
+
+  <hr>
+  <h2>Reviews</h2>
+  <div class="posts mt-2">
     <!-- show review -->
-    <div>
-    	<p> reviews</p>
-	    {% for review in reviews %}
-	    	<p> review {{ review }} </p>
-		{% endfor %}
-	</div>
+    <div class="card center">
+      <ul class="list-group list-group-flush">
+          {% for review in reviews %}
+              <li class="list-group-item mt-2"><b>RATING {{ review[4] }}</b> <br> {{ review[2] }} </li>
+          {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+<!-- <div class="box">Responsive</div> -->
 
 {% endblock %}

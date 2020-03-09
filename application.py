@@ -83,7 +83,7 @@ def register():
 		
 		if (validateRegisterUsername() and validateRegisterPassword()) == True:
 			if storeUser() == False:
-				return render_template("errorPage.html")
+				return render_template("errorPage.html", message="DB-error while storing user")
 		else:
 			return redirect("/register")
 
