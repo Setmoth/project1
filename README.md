@@ -1,4 +1,4 @@
-# Project 1 0 The House of Books
+# Project 1 - The House of Books
 
 Web Programming with Python and JavaScript
 
