@@ -412,7 +412,12 @@ def getGoodreadsRating(title):
 	res = requests.get("https://www.goodreads.com/book/review_counts.json",
 					params={"key":os.environ.get("GOODREADS_KEY"),"isbns":title})
 	#proces error 404
+	if res.status_code == 404:
+		y = ["n.a.","n.a."]
+		return y
+
 	result = res.json()
+
 	x = result["books"][0]
 	y = [x["text_reviews_count"],x["average_rating"]]
 
