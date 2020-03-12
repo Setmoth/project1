@@ -14,13 +14,16 @@ Here a reader can register him/herself. Validations:
 
 #Login
 -User must exist
--password must match with stored passwords
+-password must match with stored password
 
 #Search
-user can search on (parts of) isbn, title, author. THe results are presented as links so a user can link to the detailpage(title.htm)
+user can search on (parts of) isbn, title, author. The results are presented as links so a user can link to the detailpage(title.htm)
 
 #Title
-show details of a book, including ratings as provided via GOODREAD.com. It also shows a list of local reviews and a user can add a review for this book
+Shows details of a book, including ratings as provided via GOODREAD.com. It also shows a list of local reviews and a user can add a review for this book (one review per book only)
+
+#API
+calling the API will result in a JSON-reply or a 404 in case not found
 
 
 
@@ -31,11 +34,9 @@ show details of a book, including ratings as provided via GOODREAD.com. It also 
 
 ToDO
 ====
-register.html
--validations register.html (username / password)
 
 search.html
--max record to be retuned in search.html
+-max record to be returned in search.html
 -optime the query
 -highlight searchresults (searched on 2222 then highlight in the data all text with 2222 - javascript?)
 -make it responsive

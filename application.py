@@ -104,11 +104,6 @@ def search():
 		if books == []:
 			flash('Could not find any titles', 'info')
 
-		#print(searchISBN())
-		#print(len(searchISBN()))
-		#if len(searchISBN()) == 3:
-			#print("hiero")
-			#flash('Could not find any titles', 'info')
 		return render_template("search.html", books=books)
 	else:
 		return render_template("search.html")
@@ -119,7 +114,6 @@ def search():
 def title(id):
 	print(">>>>> TITLEID <<<<<")
 	# Lists details about a single book.
-	print(request.method)
 	bookID = id  #see below---- is hidden ID needed or only for routing?
 	# Make sure book exists.
 	title = db.execute("SELECT * FROM books WHERE id = :id", {"id": id}).fetchone()
@@ -128,16 +122,10 @@ def title(id):
 		return render_template("errorPage.html")
 
 	y = getGoodreadsRating(title[4])
-	print("y2", y)
-	
 
 	reviews = loadReviews(id)
 
 	if request.method == "POST":
-		print(request.method)
-		print(request.form['review']) 
-		print(request.form['title_id'])
-		print("hello end of the world")
 
 		userID = session["user_id"]
 		bookID = int(request.form.get("title_id"), 0) #make the ID een integer
@@ -151,29 +139,19 @@ def title(id):
 			flash('You already posted a review', 'warning')
 			return render_template("title.html", title=title, res=y, reviews=reviews)
 
-		print(userID, bookID, review, rating)
-
 		try:
 			db.execute("INSERT INTO reviews(id_book, id_user, review, rating) VALUES (:id_book, :id_user, :review, :rating)",
 						{"id_book": bookID, "id_user": userID, "review": review, "rating": rating})
 			db.commit()
 			reviews = loadReviews(id) # Need to see my new review too ;)
 		except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
-			print(">>>>>>>>>>>>>> ERRROR START <<<<<<<<<<<<<<<<")
+			print(">>>>>>>>>>>>>> ERROR START <<<<<<<<<<<<<<<<")
 			print(e)
-			print(">>>>>>>>>>>>>> ERRROR END <<<<<<<<<<<<<<<<")
+			print(">>>>>>>>>>>>>> ERROR END <<<<<<<<<<<<<<<<")
 			flash('An error occured, please retry', 'error')
 			return render_template("errorPage.html", message=e)
 
 	return render_template("title.html", title=title, res=y, reviews=reviews)
-
-
-@app.route("/review", methods=["POST"])
-@login_required
-def review():
-	print(">>>>> REVIEW <<<<<")
-	print("######################     OBSOLETE     ##########################################")
-	return render_template("errorPage.html", message="OBSOLETE")
 
 
 @app.route("/logout")
@@ -199,17 +177,13 @@ def errorPage():
 @app.route("/api/<isbn>")
 def isbn_api(isbn):
 	print(">>>>> API <<<<<")
-	print("isbn", isbn)
 	try:
 		title = db.execute("SELECT * FROM books WHERE isbn = :isbn",
 							{"isbn": isbn}).fetchone()
 
-		print("title.api", title)
-
 		if title == None:
 			return jsonify({"error": "Invalid isbn"}), 404
 		else:
-			print("do something")
 			y = getGoodreadsRating(isbn)
 
 	except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
@@ -372,11 +346,18 @@ def storeUser():
 		db.execute("INSERT INTO users(username, password) VALUES (:username, :password)",
 				{"username": username, "password": hashedPassword})
 		db.commit()
+
+		# Create and save uses session
+		result = db.execute("SELECT id FROM users WHERE username = :username",
+										{"username": username}).fetchone()
+		session["user_id"] = result[0]
+		if session["user_id"] == None:
+			flash('An error occured, please retry', 'error')
+			return False 
 	except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
 		print(e)
 		flash('An error occured, please retry', 'error')
 		return False 
-
 	return True
 	
 
@@ -420,11 +401,11 @@ def checkReviewUser(userID, bookID):
 							{"id_user": userID, "id_book": bookID}).fetchone() == None:
 			return True
 		else:
+			flash('An error occured, please retry, already posted a review', 'error')
 			return False
 	except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
 		print(e)
-		flash('An error occured, please retry, already posted a review', 'error')
-		return False
+		return render_template("errorPage.html")
 	return True
 
 
@@ -433,10 +414,8 @@ def getGoodreadsRating(title):
 					params={"key":os.environ.get("GOODREADS_KEY"),"isbns":title})
 	#proces error 404
 	result = res.json()
-	print(result)
 	x = result["books"][0]
 	y = [x["text_reviews_count"],x["average_rating"]]
-	print("y1", y)
 
 	return y
 
