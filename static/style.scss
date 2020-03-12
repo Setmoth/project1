@@ -1,4 +1,4 @@
-/* $colorRed: #FFF3CD; */
+$colorYellow: #FFF3CD;
 $colorGreen: #256664;
 $h1Color: #50000E;
 $h2Color: #781426;
@@ -24,7 +24,7 @@ nav .navbar-brand
   display: grid;
   grid-template: 150px; /* / auto auto auto; */
   grid-gap : 10px;
-  /* background-color: $colorRed; */
+  background-color: $colorYellow;
   border: 10px solid $colorGreen;
   padding: 10px;
   margin: 125px;
@@ -35,7 +35,7 @@ nav .navbar-brand
 
 .red {
   /* Container Border outside*/
-  /* background-color: $colorRed; */
+  background-color: $colorYellow;
   border: 10px solid $colorGreen;
   /* border-left: 25px solid #256664; */
   /* grid-area: 1 / 2 / 2; */
@@ -86,7 +86,7 @@ nav .navbar-brand
  }
 
  .card {
-  /* background-color: $colorRed; */
+  background-color: $colorYellow;
   border: none;
  }
 
@@ -101,14 +101,14 @@ nav .navbar-brand
 
 
 .btn:hover {
-  color: $colorRed;
+  color: $colorYellow;
   background-color: $colorGreen;
 }
 
 
-.list-group-item {
+/* .list-group-item {
   background-color: orange;
-}
+} */
 
 .resizedTextbox {
   width: 100px; 

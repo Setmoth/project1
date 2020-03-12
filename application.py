@@ -401,7 +401,6 @@ def checkReviewUser(userID, bookID):
 							{"id_user": userID, "id_book": bookID}).fetchone() == None:
 			return True
 		else:
-			flash('An error occured, please retry, already posted a review', 'error')
 			return False
 	except (sqlalchemy.exc.SQLAlchemyError, sqlalchemy.exc.DBAPIError) as e:
 		print(e)
